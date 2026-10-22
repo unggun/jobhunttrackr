@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gte, inArray, like, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, like, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
 	APPLICATION_STATUSES,
@@ -250,20 +250,13 @@ export async function appendAnswers(
 	await assertOwned(db, userId, id);
 	const parsed = z.array(answerInput).parse(answers);
 	if (!parsed.length) return;
-	const [{ existing }] = await db
-		.select({ existing: count() })
-		.from(applicationAnswer)
-		.where(eq(applicationAnswer.applicationId, id));
-	await db.batch([
-		db.insert(applicationAnswer).values({ ...parsed[0], applicationId: id, position: existing }),
-		...parsed
-			.slice(1)
-			.map((answer, index) =>
-				db
-					.insert(applicationAnswer)
-					.values({ ...answer, applicationId: id, position: existing + index + 1 })
-			)
-	]);
+	// Each insert takes the next position itself, and a batch runs as one transaction,
+	// so two appends at the same time can't hand out the same positions.
+	const nextPosition = sql<number>`(select coalesce(max(${applicationAnswer.position}), -1) + 1 from ${applicationAnswer} where ${applicationAnswer.applicationId} = ${id})`;
+	const [first, ...rest] = parsed.map((answer) =>
+		db.insert(applicationAnswer).values({ ...answer, applicationId: id, position: nextPosition })
+	);
+	await db.batch([first, ...rest]);
 }
 
 export async function deleteApplication(db: Db, userId: string, id: string) {

@@ -24,6 +24,10 @@ export const load: PageServerLoad = async (event) => {
 	return {
 		clientName: client.client_name || 'An app',
 		redirectHost: redirectUri?.host ?? null,
+		// With these scopes the app can also read your profile from the userinfo endpoint.
+		sharesIdentity: (event.url.searchParams.get('scope') ?? '')
+			.split(' ')
+			.some((scope) => scope === 'profile' || scope === 'email'),
 		oauthQuery
 	};
 };
