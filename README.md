@@ -89,13 +89,25 @@ Fill in `.env`:
 
 ## Deploy to Cloudflare
 
+You don't create the Worker in the Cloudflare dashboard. The first `wrangler deploy` creates it, named `jobhunttrackr` after `name` in `wrangler.jsonc`.
+
 1. `npx wrangler login`
-2. `npx wrangler d1 create jobhunttrackr` and copy the `database_id` it prints into `wrangler.jsonc`, under `d1_databases`.
-3. `npm run db:migrate:remote`
-4. Create a second GitHub OAuth app whose callback URL is `https://<your-worker>.workers.dev/api/auth/callback/github`.
-5. Set the secrets: `npx wrangler secret put BETTER_AUTH_SECRET`, and the same for `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` and `ORIGIN` (your workers.dev URL or custom domain).
-6. `npm run build && npx wrangler deploy`
-7. Optional: [connect Claude](#connect-claude) to `https://<your-worker>.workers.dev/mcp`.
+2. Create the database: `npx wrangler d1 create jobhunttrackr`. Copy the `database_id` it prints into `wrangler.jsonc`, under `d1_databases`.
+3. Create the tables: `npm run db:migrate:remote`
+4. Pick the app's address. Either:
+   - **workers.dev (simplest):** run `npm run build && npx wrangler deploy`. It prints the address, `https://jobhunttrackr.<your-subdomain>.workers.dev`. If this is your first Worker, wrangler asks you to choose `<your-subdomain>` first.
+   - **Your own domain:** if the domain is on Cloudflare, add `"routes": [{ "pattern": "jobs.example.com", "custom_domain": true }]` to `wrangler.jsonc`. Your address is then `https://jobs.example.com`, and the deploy in step 7 sets up DNS and HTTPS for it.
+5. Create a GitHub OAuth app at <https://github.com/settings/developers>. Use your address as the homepage URL and `<your address>/api/auth/callback/github` as the callback URL. Use a separate app from the one for local development, since each app has one callback URL.
+6. Set the secrets. Each command asks for the value, and if the Worker doesn't exist yet, it offers to create it:
+   - `npx wrangler secret put ORIGIN`: your address, e.g. `https://jobs.example.com`
+   - `npx wrangler secret put BETTER_AUTH_SECRET`: a long random string, e.g. from `openssl rand -base64 32`
+   - `npx wrangler secret put GITHUB_CLIENT_ID` and `npx wrangler secret put GITHUB_CLIENT_SECRET`: from the GitHub app
+   - Optional: `npx wrangler secret put ALLOWED_EMAILS`
+7. Deploy: `npm run build && npx wrangler deploy`
+8. Open your address and sign in with GitHub. The first account to sign in becomes the owner.
+9. Optional: [connect Claude](#connect-claude) to `<your address>/mcp`.
+
+After pulling updates, run `npm run db:migrate:remote` and step 7 again.
 
 ## Development
 
