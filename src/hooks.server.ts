@@ -1,5 +1,5 @@
 import type { Handle } from '@sveltejs/kit/hooks';
-import { redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { building } from '$app/env';
 import { env } from 'cloudflare:workers';
@@ -8,6 +8,39 @@ import { createAuth } from '#lib/server/auth.ts';
 import { getDb } from '#lib/server/db/index.ts';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { handleWellKnown } from '#lib/server/oauth-metadata.ts';
+
+/** OAuth endpoints that apps call from their own servers, with their own origin or none. */
+const OAUTH_SERVER_PATHS = [
+	'/api/auth/oauth2/token',
+	'/api/auth/oauth2/register',
+	'/api/auth/oauth2/revoke',
+	'/api/auth/oauth2/introspect'
+];
+const FORM_CONTENT_TYPES = [
+	'application/x-www-form-urlencoded',
+	'multipart/form-data',
+	'text/plain'
+];
+const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
+
+/**
+ * SvelteKit's cross-site form check, minus the OAuth endpoints above. It refuses form posts
+ * from other sites so a page elsewhere can't submit this app's forms as a signed-in user.
+ */
+const handleCsrf: Handle = ({ event, resolve }) => {
+	const { request, url } = event;
+	const contentType = request.headers.get('content-type')?.split(';')[0].trim().toLowerCase();
+	const isForm = !contentType || FORM_CONTENT_TYPES.includes(contentType);
+	if (
+		!SAFE_METHODS.includes(request.method) &&
+		isForm &&
+		request.headers.get('origin') !== url.origin &&
+		!OAUTH_SERVER_PATHS.includes(url.pathname)
+	) {
+		error(403, `Cross-site ${request.method} form submissions are forbidden`);
+	}
+	return resolve(event);
+};
 
 const handleBetterAuth: Handle = async ({ event, resolve }) => {
 	if (!env.DB) throw new Error('D1 binding "DB" not found - check wrangler.jsonc');
@@ -68,4 +101,4 @@ const requireUser: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-export const handle: Handle = sequence(handleBetterAuth, handleDiscovery, requireUser);
+export const handle: Handle = sequence(handleCsrf, handleBetterAuth, handleDiscovery, requireUser);

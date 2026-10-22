@@ -12,7 +12,10 @@ export default defineConfig({
 				runes: ({ filename }) =>
 					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
 			},
-			adapter: adapter()
+			adapter: adapter(),
+			// Apps like Claude call the OAuth token endpoint from their servers, which SvelteKit's
+			// built-in origin check would refuse. src/hooks.server.ts does the check instead.
+			csrf: { trustedOrigins: ['*'] }
 		})
 	],
 	test: {
