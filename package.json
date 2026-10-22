@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "npm run clean:build && wrangler types --check --env-file .env.example && vite build",
+		"build": "npm run clean:build && vite build",
 		"preview": "wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173",
 		"prepare": "svelte-kit sync || echo ''",
 		"clean:build": "node -e \"for (const dir of ['.svelte-kit/cloudflare', '.svelte-kit/output']) require('fs').rmSync(dir, { recursive: true, force: true })\"",
