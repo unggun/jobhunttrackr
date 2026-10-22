@@ -7,7 +7,8 @@ const optionalAtBuild = (value: string | undefined) => value ?? '';
 export const variables = defineEnvVars({
 	ORIGIN: {
 		description: 'The app origin (base URL), e.g. `http://localhost:5173`.',
-		schema: optionalAtBuild
+		// A trailing slash would put `//` into every URL built from it.
+		schema: (value) => optionalAtBuild(value).replace(/\/+$/, '')
 	},
 	BETTER_AUTH_SECRET: {
 		description:

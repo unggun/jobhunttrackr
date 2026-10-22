@@ -272,6 +272,10 @@ export function createMcpServer(db: Db, userId: string, origin: string) {
 				scheduled_at: dateInput.optional(),
 				interviewers: z.string().optional(),
 				prep_notes: z.string().optional().describe('What to prepare'),
+				feedback: z
+					.string()
+					.optional()
+					.describe('How a finished round went, and any feedback from the company'),
 				outcome: z.enum(INTERVIEW_OUTCOMES).optional()
 			}
 		},

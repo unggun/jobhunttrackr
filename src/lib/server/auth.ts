@@ -49,7 +49,10 @@ const authConfig = {
 			resources: [mcpResource(ORIGIN)],
 			clientRegistrationDefaultResources: [mcpResource(ORIGIN)],
 			clientRegistrationDefaultScopes: ['openid', 'profile', 'email', 'offline_access'],
-			refreshTokenExpiresIn: 90 * DAY
+			refreshTokenExpiresIn: 90 * DAY,
+			// A client retrying a refresh (lost response, two requests at once) gets the same
+			// tokens back instead of being signed out as if its refresh token were stolen.
+			refreshTokenReuseInterval: 60
 		}),
 		mcpAccessTokens(),
 		sveltekitCookies(getRequestEvent) // make sure this is the last plugin in the array

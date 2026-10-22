@@ -111,6 +111,17 @@ describe('MCP server', () => {
 			'Salary expectation?'
 		]);
 		expect(app.rounds).toHaveLength(1);
+
+		await call('add_interview_round', {
+			application_id: id,
+			name: 'Technical interview',
+			feedback: 'Went well, they liked the system design answer',
+			outcome: 'passed'
+		});
+		const withFeedback = await call('get_application', { application_id: id });
+		expect(withFeedback.rounds).toContainEqual(
+			expect.objectContaining({ feedback: 'Went well, they liked the system design answer' })
+		);
 		expect(app.userId).toBeUndefined();
 
 		await call('save_answers', {

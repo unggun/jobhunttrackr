@@ -31,6 +31,9 @@ async function authenticate(request: Request, auth: App.Locals['auth']) {
 	try {
 		const result = await auth.api.verifyMcpAccessToken({ body: { token } });
 		if (!result.active || !result.userId) return null;
+		// This endpoint only takes Bearer tokens, so a DPoP-bound token sent here as a Bearer
+		// token is either a client bug or a stolen token being used without its key.
+		if (result.senderConstrained) return null;
 		// Tokens issued for another resource can't be used here. Clients that don't send a
 		// resource get a token without an audience, which only this app accepts anyway.
 		if (result.audience.length && !result.audience.includes(mcpResource(ORIGIN))) return null;

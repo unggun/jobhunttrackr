@@ -4,7 +4,7 @@ import { createAuthEndpoint } from 'better-auth/api';
 import { z } from 'zod';
 
 /** The MCP endpoint, which is the protected resource Claude gets access tokens for. */
-export const mcpResource = (origin: string) => `${origin.replace(/\/+$/, '')}/mcp`;
+export const mcpResource = (origin: string) => `${origin}/mcp`;
 
 /**
  * Lets the app check an MCP access token with the OAuth provider's own validation
@@ -29,7 +29,9 @@ export const mcpAccessTokens = () =>
 						active: payload.active === true,
 						userId: typeof payload.sub === 'string' ? payload.sub : null,
 						audience: [payload.aud ?? []].flat().map(String),
-						scopes: typeof payload.scope === 'string' ? payload.scope.split(' ') : []
+						scopes: typeof payload.scope === 'string' ? payload.scope.split(' ') : [],
+						// DPoP-bound tokens carry a key confirmation (RFC 7800 `cnf`).
+						senderConstrained: payload.cnf !== undefined
 					};
 				}
 			)

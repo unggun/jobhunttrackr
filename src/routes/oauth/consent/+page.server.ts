@@ -1,11 +1,17 @@
+import { BETTER_AUTH_SECRET } from '$app/env/private';
+import { verifyOAuthQueryParams } from '@better-auth/oauth-provider';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
-	// The OAuth server sends you here with a signed copy of the app's authorization request.
+	// The OAuth server sends you here with a signed, short-lived copy of the app's request.
+	// Check the signature first, so a tampered or expired link can't show a misleading page.
+	const oauthQuery = event.url.search.slice(1);
+	if (!(await verifyOAuthQueryParams(oauthQuery, BETTER_AUTH_SECRET))) {
+		error(400, 'This link has expired. Start connecting again from the app.');
+	}
 	const clientId = event.url.searchParams.get('client_id');
-	if (!clientId || !event.url.searchParams.has('sig'))
-		error(400, 'This link is missing its request.');
+	if (!clientId) error(400, 'This link is missing its request.');
 
 	const client = await event.locals.auth.api
 		.getOAuthClientPublic({ query: { client_id: clientId }, headers: event.request.headers })
@@ -18,7 +24,7 @@ export const load: PageServerLoad = async (event) => {
 	return {
 		clientName: client.client_name || 'An app',
 		redirectHost: redirectUri?.host ?? null,
-		oauthQuery: event.url.search.slice(1)
+		oauthQuery
 	};
 };
 
