@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { APPLICATION_STATUSES, WORK_MODES } from '../../applications';
+import { APPLICATION_STATUSES, INTERVIEW_OUTCOMES, WORK_MODES } from '../../applications';
 import { user } from './auth.schema';
 
 const id = () =>
@@ -96,9 +96,7 @@ export const interviewRound = sqliteTable(
 		interviewers: text('interviewers'),
 		prepNotes: text('prep_notes'),
 		feedback: text('feedback'),
-		outcome: text('outcome', { enum: ['pending', 'passed', 'failed', 'cancelled'] })
-			.notNull()
-			.default('pending'),
+		outcome: text('outcome', { enum: INTERVIEW_OUTCOMES }).notNull().default('pending'),
 		createdAt: timestamp('created_at')
 	},
 	(table) => [index('interview_round_application_idx').on(table.applicationId)]
