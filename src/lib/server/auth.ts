@@ -36,7 +36,17 @@ const authConfig = {
 	]
 } satisfies Omit<Parameters<typeof betterAuth>[0], 'database'>;
 
+const REQUIRED_ENV = { ORIGIN, BETTER_AUTH_SECRET, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET };
+
 export const createAuth = (d1: D1Database) => {
+	if (d1) {
+		const missing = Object.entries(REQUIRED_ENV).filter(([, value]) => !value);
+		if (missing.length) {
+			throw new Error(
+				`Missing environment variables: ${missing.map(([name]) => name).join(', ')}. See README.md.`
+			);
+		}
+	}
 	const db = getDb(d1);
 	return betterAuth({
 		...authConfig,
