@@ -2,7 +2,68 @@
 @plugin '@tailwindcss/forms';
 
 @layer base {
+	:root {
+		color-scheme: light dark;
+	}
+
 	body {
-		@apply bg-zinc-50 text-zinc-900 antialiased;
+		@apply bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100;
+	}
+
+	/* :not() adds specificity, so this wins over the forms plugin's white backgrounds. */
+	:is(input, select, textarea):not([type='checkbox'], [type='radio'], [type='hidden']) {
+		@apply dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500;
+	}
+}
+
+@layer components {
+	.card {
+		@apply rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900;
+	}
+
+	.field {
+		@apply mt-1 block w-full rounded-lg border-zinc-300 text-sm focus:border-zinc-500 focus:ring-zinc-500;
+	}
+
+	.label {
+		@apply block text-sm font-medium text-zinc-700 dark:text-zinc-300;
+	}
+
+	.btn {
+		@apply inline-flex items-center justify-center gap-1.5 rounded-lg bg-zinc-900 px-3.5 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white;
+	}
+
+	.btn-secondary {
+		@apply inline-flex items-center justify-center gap-1.5 rounded-lg border border-zinc-300 bg-white px-3.5 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800;
+	}
+
+	/* Rendered job postings. */
+	.prose-posting {
+		@apply text-sm leading-relaxed text-zinc-700 dark:text-zinc-300;
+
+		& h1,
+		& h2,
+		& h3,
+		& h4 {
+			@apply mt-5 mb-2 font-semibold text-zinc-900 first:mt-0 dark:text-zinc-100;
+		}
+		& p {
+			@apply my-2;
+		}
+		& ul {
+			@apply my-2 list-disc pl-5;
+		}
+		& ol {
+			@apply my-2 list-decimal pl-5;
+		}
+		& li {
+			@apply my-0.5;
+		}
+		& a {
+			@apply text-sky-700 underline dark:text-sky-400;
+		}
+		& strong {
+			@apply font-semibold text-zinc-900 dark:text-zinc-100;
+		}
 	}
 }

@@ -4,7 +4,16 @@ A free, open-source tracker for people applying to lots of jobs. It remembers wh
 
 It runs on Cloudflare's free tier (Workers + D1), so you can host your own copy at no cost. An MCP server is planned so Claude can log applications for you while it helps fill in forms.
 
-> **Status:** early work in progress. The data model, sign-in and a basic applications page are in place. The full UI, the MCP server and a one-click deploy are next.
+> **Status:** work in progress. Tracking, the board, interview prep and sign-in work. The MCP server for Claude and a one-click deploy are next.
+
+## Features
+
+- **List and board views** of your applications, with search, status filters and one-click status changes. Drag cards between columns on the board.
+- **"Have I applied here?" warning** when you add a job whose posting link or company you already track.
+- **Form answers** saved per application, each with a copy button for the next form that asks the same question.
+- **Interview prep page** with the next round, the saved job posting, what you told them and notes from earlier rounds. It prints cleanly too.
+- **Follow-up nudges** for applications with no news for two weeks, and upcoming interviews at the top of the list.
+- Dark mode, a phone-friendly layout, and keyboard shortcuts: `N` adds an application and `/` jumps to search.
 
 ## What it tracks
 

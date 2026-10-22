@@ -4,13 +4,18 @@ import { getPlatformProxy } from 'wrangler';
 import { getDb } from './db';
 import { user } from './db/schema';
 import {
+	addInterviewRound,
 	createApplication,
+	deleteInterviewRound,
 	findSimilarApplications,
 	getApplication,
 	listApplications,
 	replaceAnswers,
 	setStatus,
-	updateApplication
+	statusCounts,
+	updateApplication,
+	updateInterviewRound,
+	upcomingInterviews
 } from './applications';
 
 // Runs against an in-memory local D1 with the real migrations applied.
@@ -102,5 +107,44 @@ describe('applications', () => {
 		const app = await getApplication(db, 'me', acme.id);
 		expect(app).toMatchObject({ salary: '$100k', jobUrlKey: 'acme.com/new' });
 		expect(app?.answers).toHaveLength(1);
+	});
+
+	it('counts applications per status', async () => {
+		const counts = await statusCounts(db, 'me');
+		expect(counts).toMatchObject({ applied: 1, interviewing: 1, offer: 0 });
+		expect((await statusCounts(db, 'other')).applied).toBe(0);
+	});
+
+	it('tracks interview rounds and lists upcoming ones', async () => {
+		const [globex] = await listApplications(db, 'me', { search: 'globex' });
+		const soon = new Date(Date.now() + 86_400_000);
+		const later = new Date(Date.now() + 3 * 86_400_000);
+		const past = new Date(Date.now() - 86_400_000);
+		const second = await addInterviewRound(db, 'me', globex.id, {
+			name: 'Portfolio review',
+			scheduledAt: later
+		});
+		await addInterviewRound(db, 'me', globex.id, { name: 'Recruiter call', scheduledAt: soon });
+		const old = await addInterviewRound(db, 'me', globex.id, { name: 'Intro', scheduledAt: past });
+
+		expect((await upcomingInterviews(db, 'me')).map((round) => round.name)).toEqual([
+			'Recruiter call',
+			'Portfolio review'
+		]);
+		expect(await upcomingInterviews(db, 'other')).toEqual([]);
+
+		await updateInterviewRound(db, 'me', globex.id, second, {
+			outcome: 'passed',
+			feedback: 'Went well'
+		});
+		expect((await upcomingInterviews(db, 'me')).map((round) => round.name)).toEqual([
+			'Recruiter call'
+		]);
+
+		await expect(deleteInterviewRound(db, 'other', globex.id, old)).rejects.toThrow('not found');
+		await deleteInterviewRound(db, 'me', globex.id, old);
+		const app = await getApplication(db, 'me', globex.id);
+		expect(app?.rounds.map((round) => round.name)).toEqual(['Recruiter call', 'Portfolio review']);
+		expect(app?.rounds[1]).toMatchObject({ outcome: 'passed', feedback: 'Went well' });
 	});
 });

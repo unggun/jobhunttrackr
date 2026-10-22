@@ -34,6 +34,40 @@ export const CLOSED_STATUSES: readonly ApplicationStatus[] = [
 	'ghosted'
 ];
 
+export const INTERVIEW_OUTCOMES = ['pending', 'passed', 'failed', 'cancelled'] as const;
+
+export type InterviewOutcome = (typeof INTERVIEW_OUTCOMES)[number];
+
+/** Statuses shown as columns on the board, in pipeline order. */
+export const BOARD_STATUSES: readonly ApplicationStatus[] = [
+	'saved',
+	'applied',
+	'screening',
+	'interviewing',
+	'offer'
+];
+
+const FOLLOW_UP_AFTER_DAYS = 14;
+
+/**
+ * True when an application has sat without news long enough that it's worth a follow-up
+ * email, or marking it as ghosted.
+ */
+export function needsFollowUp(
+	app: { status: ApplicationStatus; updatedAt: Date },
+	now = new Date()
+): boolean {
+	if (app.status !== 'applied' && app.status !== 'screening') return false;
+	return now.getTime() - app.updatedAt.getTime() > FOLLOW_UP_AFTER_DAYS * 24 * 60 * 60 * 1000;
+}
+
+/** "Jakarta · Hybrid", without repeating "Remote" when the location already says it. */
+export function placeLabel(app: { location?: string | null; workMode?: string | null }) {
+	const mode = app.workMode ? app.workMode[0].toUpperCase() + app.workMode.slice(1) : null;
+	if (mode && app.location?.trim().toLowerCase() === mode.toLowerCase()) return mode;
+	return [app.location, mode].filter(Boolean).join(' · ');
+}
+
 export const WORK_MODES = ['onsite', 'hybrid', 'remote'] as const;
 
 export type WorkMode = (typeof WORK_MODES)[number];

@@ -1,6 +1,12 @@
-import { and, asc, desc, eq, inArray, like, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, inArray, like, or } from 'drizzle-orm';
 import { z } from 'zod';
-import { APPLICATION_STATUSES, WORK_MODES, jobUrlKey } from '../applications';
+import {
+	APPLICATION_STATUSES,
+	INTERVIEW_OUTCOMES,
+	WORK_MODES,
+	type ApplicationStatus,
+	jobUrlKey
+} from '../applications';
 import type { getDb } from './db';
 import { application, applicationAnswer, interviewRound, statusEvent } from './db/schema';
 
@@ -67,6 +73,8 @@ export function listApplications(
 			location: application.location,
 			workMode: application.workMode,
 			status: application.status,
+			salary: application.salary,
+			source: application.source,
 			jobUrl: application.jobUrl,
 			appliedAt: application.appliedAt,
 			updatedAt: application.updatedAt
@@ -235,4 +243,100 @@ export async function replaceAnswers(
 export async function deleteApplication(db: Db, userId: string, id: string) {
 	await assertOwned(db, userId, id);
 	await db.delete(application).where(eq(application.id, id));
+}
+
+export async function statusCounts(db: Db, userId: string) {
+	const rows = await db
+		.select({ status: application.status, count: count() })
+		.from(application)
+		.where(eq(application.userId, userId))
+		.groupBy(application.status);
+	const counts = Object.fromEntries(APPLICATION_STATUSES.map((status) => [status, 0])) as Record<
+		ApplicationStatus,
+		number
+	>;
+	for (const row of rows) counts[row.status] = row.count;
+	return counts;
+}
+
+/** Interviews still to come, soonest first, with the application they belong to. */
+export function upcomingInterviews(db: Db, userId: string, from = new Date()) {
+	return db
+		.select({
+			id: interviewRound.id,
+			name: interviewRound.name,
+			scheduledAt: interviewRound.scheduledAt,
+			applicationId: application.id,
+			company: application.company,
+			role: application.role
+		})
+		.from(interviewRound)
+		.innerJoin(application, eq(interviewRound.applicationId, application.id))
+		.where(
+			and(
+				eq(application.userId, userId),
+				eq(interviewRound.outcome, 'pending'),
+				gte(interviewRound.scheduledAt, from)
+			)
+		)
+		.orderBy(asc(interviewRound.scheduledAt));
+}
+
+export const interviewRoundInput = z.object({
+	name: z.string().trim().min(1),
+	scheduledAt: z.coerce.date().nullish(),
+	interviewers: optionalText,
+	prepNotes: optionalText,
+	feedback: optionalText,
+	outcome: z.enum(INTERVIEW_OUTCOMES).default('pending')
+});
+
+export type InterviewRoundInput = z.input<typeof interviewRoundInput>;
+
+export async function addInterviewRound(
+	db: Db,
+	userId: string,
+	applicationId: string,
+	input: InterviewRoundInput
+) {
+	await assertOwned(db, userId, applicationId);
+	const id = crypto.randomUUID();
+	await db
+		.insert(interviewRound)
+		.values({ ...interviewRoundInput.parse(input), id, applicationId });
+	return id;
+}
+
+async function assertRoundOwned(db: Db, userId: string, applicationId: string, roundId: string) {
+	await assertOwned(db, userId, applicationId);
+	const found = await db
+		.select({ id: interviewRound.id })
+		.from(interviewRound)
+		.where(and(eq(interviewRound.id, roundId), eq(interviewRound.applicationId, applicationId)))
+		.get();
+	if (!found) throw new ApplicationNotFoundError(applicationId);
+}
+
+export async function updateInterviewRound(
+	db: Db,
+	userId: string,
+	applicationId: string,
+	roundId: string,
+	input: Partial<InterviewRoundInput>
+) {
+	await assertRoundOwned(db, userId, applicationId, roundId);
+	await db
+		.update(interviewRound)
+		.set(interviewRoundInput.partial().parse(input))
+		.where(eq(interviewRound.id, roundId));
+}
+
+export async function deleteInterviewRound(
+	db: Db,
+	userId: string,
+	applicationId: string,
+	roundId: string
+) {
+	await assertRoundOwned(db, userId, applicationId, roundId);
+	await db.delete(interviewRound).where(eq(interviewRound.id, roundId));
 }

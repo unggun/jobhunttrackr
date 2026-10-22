@@ -1,15 +1,12 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { z } from 'zod';
-import { applicationInput, createApplication } from '#lib/server/applications.ts';
+import { createApplication } from '#lib/server/applications.ts';
+import { parseApplicationForm } from '#lib/server/forms.ts';
 import type { Actions } from './$types';
 
 export const actions: Actions = {
 	default: async ({ locals, request }) => {
-		const values = Object.fromEntries(await request.formData()) as Record<string, string>;
-		const parsed = applicationInput.safeParse({ ...values, workMode: values.workMode || null });
-		if (!parsed.success) {
-			return fail(400, { values, errors: z.flattenError(parsed.error).fieldErrors });
-		}
+		const parsed = parseApplicationForm(await request.formData());
+		if (!parsed.success) return fail(400, { values: parsed.values, errors: parsed.errors });
 		const id = await createApplication(locals.db, locals.user!.id, parsed.data);
 		redirect(303, `/applications/${id}`);
 	}
