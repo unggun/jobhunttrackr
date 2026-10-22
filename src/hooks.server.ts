@@ -23,8 +23,31 @@ const handleBetterAuth: Handle = async ({ event, resolve }) => {
 		event.locals.user = session.user;
 	}
 
-	return svelteKitHandler({ event, resolve, auth, building });
+	const response = await svelteKitHandler({ event, resolve, auth, building });
+	if (event.url.pathname.startsWith('/api/auth/oauth2/') && response.status >= 400) {
+		await logOAuthError(event.request, event.url.pathname, response);
+	}
+	return response;
 };
+
+/**
+ * Logs why an OAuth request from an app like Claude was refused, so `wrangler tail`
+ * shows the reason. Logs the error code and how the client authenticated, never secrets.
+ */
+async function logOAuthError(request: Request, path: string, response: Response) {
+	const body = (await response
+		.clone()
+		.json()
+		.catch(() => null)) as Record<string, string> | null;
+	console.warn('OAuth request refused', {
+		path,
+		status: response.status,
+		error: body?.error ?? body?.code,
+		description: body?.error_description ?? body?.message,
+		clientAuth: request.headers.get('authorization')?.split(' ')[0] ?? 'none',
+		contentType: request.headers.get('content-type')
+	});
+}
 
 /** OAuth discovery documents that MCP clients fetch before signing in. */
 const handleDiscovery: Handle = async ({ event, resolve }) =>
