@@ -21,10 +21,13 @@
 		<ul class="mt-2 space-y-1.5 text-sm text-zinc-700 dark:text-zinc-200">
 			<li>• See your applications, answers and interview rounds</li>
 			<li>• Log new applications and the answers you submitted</li>
-			<li>• Update statuses and add interview rounds</li>
+			<li>• Update statuses, details and saved answers, and add interview rounds</li>
+			{#if data.identity}
+				<li>• See your {data.identity}</li>
+			{/if}
 		</ul>
 		<p class="mt-4 text-xs text-zinc-500">
-			It can't delete anything. You only need to approve once: it stays connected while you keep
+			It can't delete applications. You only need to approve once: it stays connected while you keep
 			using it.
 		</p>
 

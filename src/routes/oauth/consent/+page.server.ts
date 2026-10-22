@@ -21,9 +21,17 @@ export const load: PageServerLoad = async (event) => {
 	// Apps name themselves when they register, so also show where approving sends you.
 	const redirectUri = URL.parse(event.url.searchParams.get('redirect_uri') ?? '');
 
+	// These scopes also let the app read your profile from the userinfo endpoint.
+	const scopes = new Set((event.url.searchParams.get('scope') ?? '').split(' '));
+	const identity = [
+		...(scopes.has('profile') ? ['name', 'profile picture'] : []),
+		...(scopes.has('email') ? ['email address'] : [])
+	];
+
 	return {
 		clientName: client.client_name || 'An app',
 		redirectHost: redirectUri?.host ?? null,
+		identity: new Intl.ListFormat('en', { type: 'conjunction' }).format(identity),
 		oauthQuery
 	};
 };

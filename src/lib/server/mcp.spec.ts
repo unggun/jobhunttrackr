@@ -90,7 +90,10 @@ describe('MCP server', () => {
 
 		await call('save_answers', {
 			application_id: id,
-			answers: [{ question: 'Salary expectation?', answer: '$100k' }]
+			answers: [
+				{ question: 'Salary expectation?', answer: '$100k' },
+				{ question: 'Start date?', answer: 'December' }
+			]
 		});
 		await call('update_status', {
 			application_id: id,
@@ -108,7 +111,8 @@ describe('MCP server', () => {
 		expect(app.status).toBe('interviewing');
 		expect(app.answers.map((a: { question: string }) => a.question)).toEqual([
 			'Portfolio?',
-			'Salary expectation?'
+			'Salary expectation?',
+			'Start date?'
 		]);
 		expect(app.rounds).toHaveLength(1);
 

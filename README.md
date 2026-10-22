@@ -45,7 +45,7 @@ Claude gets these tools:
 | `get_application`     | Read back the posting and your answers, e.g. to help you prepare     |
 | `list_applications`   | See what's open                                                      |
 
-It can't delete anything.
+It can't delete applications.
 
 ### Claude Code
 
@@ -89,14 +89,14 @@ Fill in `.env`:
 
 ## Deploy to Cloudflare
 
-You don't create the Worker in the Cloudflare dashboard. The first `wrangler deploy` creates it, named `jobhunttrackr` after `name` in `wrangler.jsonc`.
+You don't create the Worker in the Cloudflare dashboard. The first `wrangler deploy` creates it, named `jobhunttrackr` after `name` in `wrangler.jsonc`. You don't need to edit `wrangler.jsonc` either: wrangler finds the database by its name, so `git pull` keeps working when you update.
 
 1. `npx wrangler login`
-2. Create the database: `npx wrangler d1 create jobhunttrackr`. Copy the `database_id` it prints into `wrangler.jsonc`, under `d1_databases`.
+2. Create the database: `npx wrangler d1 create jobhunttrackr`. If it asks whether to add it to `wrangler.jsonc`, answer no.
 3. Create the tables: `npm run db:migrate:remote`
 4. Pick the app's address. Either:
    - **workers.dev (simplest):** run `npm run build && npx wrangler deploy`. It prints the address, `https://jobhunttrackr.<your-subdomain>.workers.dev`. If this is your first Worker, wrangler asks you to choose `<your-subdomain>` first.
-   - **Your own domain:** if the domain is on Cloudflare, add `"routes": [{ "pattern": "jobs.example.com", "custom_domain": true }]` to `wrangler.jsonc`. Your address is then `https://jobs.example.com`, and the deploy in step 7 sets up DNS and HTTPS for it.
+   - **Your own domain**, if it's on Cloudflare: deploy as above, then in the Cloudflare dashboard open **Workers & Pages → jobhunttrackr → Settings → Domains & Routes → Add → Custom domain** and enter e.g. `jobs.example.com`. Cloudflare sets up DNS and HTTPS. Your address is then `https://jobs.example.com`.
 5. Create a GitHub OAuth app at <https://github.com/settings/developers>. Use your address as the homepage URL and `<your address>/api/auth/callback/github` as the callback URL. Use a separate app from the one for local development, since each app has one callback URL.
 6. Set the secrets. Each command asks for the value, and if the Worker doesn't exist yet, it offers to create it:
    - `npx wrangler secret put ORIGIN`: your address, e.g. `https://jobs.example.com`
@@ -108,6 +108,8 @@ You don't create the Worker in the Cloudflare dashboard. The first `wrangler dep
 9. Optional: [connect Claude](#connect-claude) to `<your address>/mcp`.
 
 After pulling updates, run `npm run db:migrate:remote` and step 7 again.
+
+If a deploy ever writes a `database_id` into `wrangler.jsonc` (wrangler does this when it has to create the database itself), you can discard it with `git checkout -- wrangler.jsonc`. Later deploys still find the database by name.
 
 ## Development
 
