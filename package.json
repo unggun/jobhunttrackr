@@ -18,7 +18,7 @@
 		"gen": "wrangler types --env-file .env.example",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "wrangler d1 migrations apply DB --local",
-		"auth:schema": "auth generate --config src/lib/server/auth.ts --output src/lib/server/db/auth.schema.ts --yes",
+		"auth:schema": "auth generate --config src/lib/server/auth.cli.ts --output src/lib/server/db/auth.schema.ts --yes",
 		"db:migrate:remote": "wrangler d1 migrations apply DB --remote"
 	},
 	"devDependencies": {
@@ -60,6 +60,9 @@
 		"workerd@1.20261019.1": true
 	},
 	"dependencies": {
+		"@better-auth/oauth-provider": "^1.7.12",
+		"@cfworker/json-schema": "^4.1.1",
+		"@modelcontextprotocol/sdk": "^1.32.1",
 		"marked": "^18.1.1",
 		"zod": "^4.6.7"
 	}

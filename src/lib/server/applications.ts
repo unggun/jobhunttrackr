@@ -240,6 +240,32 @@ export async function replaceAnswers(
 	]);
 }
 
+/** Adds answers after the ones already saved, e.g. from a second page of the form. */
+export async function appendAnswers(
+	db: Db,
+	userId: string,
+	id: string,
+	answers: z.input<typeof answerInput>[]
+) {
+	await assertOwned(db, userId, id);
+	const parsed = z.array(answerInput).parse(answers);
+	if (!parsed.length) return;
+	const [{ existing }] = await db
+		.select({ existing: count() })
+		.from(applicationAnswer)
+		.where(eq(applicationAnswer.applicationId, id));
+	await db.batch([
+		db.insert(applicationAnswer).values({ ...parsed[0], applicationId: id, position: existing }),
+		...parsed
+			.slice(1)
+			.map((answer, index) =>
+				db
+					.insert(applicationAnswer)
+					.values({ ...answer, applicationId: id, position: existing + index + 1 })
+			)
+	]);
+}
+
 export async function deleteApplication(db: Db, userId: string, id: string) {
 	await assertOwned(db, userId, id);
 	await db.delete(application).where(eq(application.id, id));

@@ -1,8 +1,4 @@
-import { readFileSync, readdirSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { getPlatformProxy } from 'wrangler';
-import { getDb } from './db';
-import { user } from './db/schema';
 import {
 	addInterviewRound,
 	createApplication,
@@ -17,27 +13,18 @@ import {
 	updateInterviewRound,
 	upcomingInterviews
 } from './applications';
+import { createTestDb } from './test-db';
 
 // Runs against an in-memory local D1 with the real migrations applied.
-let proxy: Awaited<ReturnType<typeof getPlatformProxy<Env>>>;
-let db: ReturnType<typeof getDb>;
+let testDb: Awaited<ReturnType<typeof createTestDb>>;
+let db: typeof testDb.db;
 
 beforeAll(async () => {
-	proxy = await getPlatformProxy<Env>({ persist: false });
-	for (const file of readdirSync('migrations')
-		.filter((name) => name.endsWith('.sql'))
-		.sort()) {
-		const statements = readFileSync(`migrations/${file}`, 'utf8').split('--> statement-breakpoint');
-		for (const statement of statements) await proxy.env.DB.prepare(statement).run();
-	}
-	db = getDb(proxy.env.DB);
-	await db.insert(user).values([
-		{ id: 'me', name: 'Me', email: 'me@example.com' },
-		{ id: 'other', name: 'Other', email: 'other@example.com' }
-	]);
+	testDb = await createTestDb();
+	db = testDb.db;
 }, 60_000);
 
-afterAll(() => proxy?.dispose());
+afterAll(() => testDb?.dispose());
 
 describe('applications', () => {
 	it('creates an application with answers, a posting and a first status event', async () => {

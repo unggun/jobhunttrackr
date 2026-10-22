@@ -2,9 +2,9 @@
 
 A free, open-source tracker for people applying to lots of jobs. It remembers where you applied, what you typed into each application form, where each application stands, and keeps a copy of the job posting so you can prepare for interviews after the posting is gone.
 
-It runs on Cloudflare's free tier (Workers + D1), so you can host your own copy at no cost. An MCP server is planned so Claude can log applications for you while it helps fill in forms.
+It runs on Cloudflare's free tier (Workers + D1), so you can host your own copy at no cost. It also has an MCP server, so Claude can check whether you already applied, and log the application and your form answers while it helps you fill in forms.
 
-> **Status:** work in progress. Tracking, the board, interview prep and sign-in work. The MCP server for Claude and a one-click deploy are next.
+> **Status:** work in progress. Tracking, the board, interview prep, sign-in and the Claude connector work. A one-click deploy is next.
 
 ## Features
 
@@ -13,6 +13,7 @@ It runs on Cloudflare's free tier (Workers + D1), so you can host your own copy 
 - **Form answers** saved per application, each with a copy button for the next form that asks the same question.
 - **Interview prep page** with the next round, the saved job posting, what you told them and notes from earlier rounds. It prints cleanly too.
 - **Follow-up nudges** for applications with no news for two weeks, and upcoming interviews at the top of the list.
+- **Works with Claude** through MCP: Claude Code, claude.ai and the Claude apps can look up and log applications for you. See [Connect Claude](#connect-claude).
 - Dark mode, a phone-friendly layout, and keyboard shortcuts: `N` adds an application and `/` jumps to search.
 
 ## What it tracks
@@ -26,6 +27,47 @@ It runs on Cloudflare's free tier (Workers + D1), so you can host your own copy 
 ## Sign-in
 
 You sign in on the app itself with GitHub, and stay signed in for 30 days. Only one account can be created: the first person to sign in becomes the owner. To allow more people, list their emails in `ALLOWED_EMAILS`.
+
+## Connect Claude
+
+Your tracker is also an MCP server at `https://<your-app>/mcp`. When Claude connects, it opens your tracker so you can sign in and approve it once. After that it stays connected.
+
+Claude gets these tools:
+
+| Tool                  | What Claude uses it for                                              |
+| --------------------- | -------------------------------------------------------------------- |
+| `find_applications`   | "Have I applied here already?", by posting link or company           |
+| `log_application`     | Save an application with the job posting and every form answer       |
+| `save_answers`        | Add answers from later pages of a multi-step form                    |
+| `update_status`       | Record news: a screening call, an interview, an offer or a rejection |
+| `update_application`  | Fill in details later, like the salary or the posting text           |
+| `add_interview_round` | Schedule an interview round                                          |
+| `get_application`     | Read back the posting and your answers, e.g. to help you prepare     |
+| `list_applications`   | See what's open                                                      |
+
+It can't delete anything.
+
+### Claude Code
+
+```sh
+claude mcp add --transport http --scope user jobhunt https://<your-app>/mcp
+```
+
+Then run `/mcp` inside Claude Code, pick `jobhunt` and choose **Authenticate**. Your browser opens your tracker: sign in and click **Allow**.
+
+### claude.ai, Claude Desktop and mobile
+
+Open **Settings → Connectors → Add custom connector**, name it "Job Hunt Tracker" and paste `https://<your-app>/mcp` as the URL. Click **Connect**, sign in and click **Allow**. The connector then works in the Claude apps on all your devices.
+
+### Using it
+
+The server tells Claude when to use each tool, so asking normally works:
+
+> Help me apply to https://jobs.example.com/123. Check my tracker first.
+
+> I just got an interview invite from Acme for next Tuesday at 2pm. Update my tracker.
+
+> Help me prepare for my Acme interview.
 
 ## Run it locally
 
@@ -53,6 +95,7 @@ Fill in `.env`:
 4. Create a second GitHub OAuth app whose callback URL is `https://<your-worker>.workers.dev/api/auth/callback/github`.
 5. Set the secrets: `npx wrangler secret put BETTER_AUTH_SECRET`, and the same for `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` and `ORIGIN` (your workers.dev URL or custom domain).
 6. `npm run build && npx wrangler deploy`
+7. Optional: [connect Claude](#connect-claude) to `https://<your-worker>.workers.dev/mcp`.
 
 ## Development
 
