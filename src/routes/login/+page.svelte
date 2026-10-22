@@ -12,7 +12,11 @@
 <main class="flex min-h-screen items-center justify-center px-4">
 	<div class="w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
 		<h1 class="text-xl font-semibold text-zinc-900">Job Hunt Tracker</h1>
-		<p class="mt-1 text-sm text-zinc-500">Sign in to see your applications.</p>
+		<p class="mt-1 text-sm text-zinc-500">
+			{data.oauthQuery
+				? 'Sign in to connect an app to your tracker.'
+				: 'Sign in to see your applications.'}
+		</p>
 
 		{#if data.error}
 			<p class="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -26,6 +30,7 @@
 
 		<form method="post" action="?/github" use:enhance class="mt-6">
 			<input type="hidden" name="next" value={data.next} />
+			{#if data.oauthQuery}<input type="hidden" name="oauth_query" value={data.oauthQuery} />{/if}
 			<button
 				class="flex w-full items-center justify-center gap-2 rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-700"
 			>

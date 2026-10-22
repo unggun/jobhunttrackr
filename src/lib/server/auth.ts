@@ -6,6 +6,7 @@ import {
 	ALLOWED_EMAILS
 } from '$app/env/private';
 
+import { oauthProvider } from '@better-auth/oauth-provider';
 import { betterAuth } from 'better-auth/minimal';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { sveltekitCookies } from 'better-auth/svelte-kit';
@@ -14,6 +15,7 @@ import { count } from 'drizzle-orm';
 import { getDb } from '#lib/server/db/index.ts';
 import { user } from '#lib/server/db/schema.ts';
 import { canCreateAccount } from '#lib/server/access.ts';
+import { mcpAccessTokens, mcpResource } from '#lib/server/mcp-auth.ts';
 
 const DAY = 60 * 60 * 24;
 
@@ -32,6 +34,27 @@ const authConfig = {
 		updateAge: DAY
 	},
 	plugins: [
+		// Makes the app an OAuth server, so Claude can connect to the MCP endpoint with your account.
+		// Claude registers itself (dynamic client registration), you sign in and approve once,
+		// and it keeps access through refresh tokens.
+		oauthProvider({
+			loginPage: '/login',
+			consentPage: '/oauth/consent',
+			allowDynamicClientRegistration: true,
+			allowUnauthenticatedClientRegistration: true,
+			// Claude Code registers a http://localhost callback without saying it's a native app.
+			clientRegistrationDefaultApplicationType: 'infer',
+			// Opaque access tokens checked against the database, so no signing keys to manage.
+			disableJwtPlugin: true,
+			resources: [mcpResource(ORIGIN)],
+			clientRegistrationDefaultResources: [mcpResource(ORIGIN)],
+			clientRegistrationDefaultScopes: ['openid', 'profile', 'email', 'offline_access'],
+			refreshTokenExpiresIn: 90 * DAY,
+			// A client retrying a refresh (lost response, two requests at once) gets the same
+			// tokens back instead of being signed out as if its refresh token were stolen.
+			refreshTokenReuseInterval: 60
+		}),
+		mcpAccessTokens(),
 		sveltekitCookies(getRequestEvent) // make sure this is the last plugin in the array
 	]
 } satisfies Omit<Parameters<typeof betterAuth>[0], 'database'>;
@@ -68,11 +91,3 @@ export const createAuth = (d1: D1Database) => {
 		}
 	});
 };
-
-/**
- * DO NOT USE!
- *
- * This instance is used by the `auth` CLI for schema generation ONLY.
- * To access `auth` at runtime, use `event.locals.auth`.
- */
-export const auth = createAuth(null!);
