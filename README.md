@@ -109,6 +109,8 @@ You don't create the Worker in the Cloudflare dashboard. The first `wrangler dep
 
 After pulling updates, run `npm run db:migrate:remote` and step 7 again.
 
+If a deploy ever writes a `database_id` into `wrangler.jsonc` (wrangler does this when it has to create the database itself), you can discard it with `git checkout -- wrangler.jsonc`. Later deploys still find the database by name.
+
 ## Development
 
 | Command                     | What it does                                     |

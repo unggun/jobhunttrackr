@@ -22,8 +22,8 @@
 			<li>• See your applications, answers and interview rounds</li>
 			<li>• Log new applications and the answers you submitted</li>
 			<li>• Update statuses, details and saved answers, and add interview rounds</li>
-			{#if data.sharesIdentity}
-				<li>• See your name and email address</li>
+			{#if data.identity}
+				<li>• See your {data.identity}</li>
 			{/if}
 		</ul>
 		<p class="mt-4 text-xs text-zinc-500">
