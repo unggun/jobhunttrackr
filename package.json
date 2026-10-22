@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "npm run clean:build && vite build",
+		"deploy": "npm run db:migrate:remote && wrangler deploy",
 		"preview": "wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173",
 		"prepare": "svelte-kit sync || echo ''",
 		"clean:build": "node -e \"for (const dir of ['.svelte-kit/cloudflare', '.svelte-kit/output']) require('fs').rmSync(dir, { recursive: true, force: true })\"",
@@ -65,5 +66,27 @@
 		"@modelcontextprotocol/sdk": "^1.32.1",
 		"marked": "^18.1.1",
 		"zod": "^4.6.7"
+	},
+	"cloudflare": {
+		"bindings": {
+			"DB": {
+				"description": "Stores your applications and sign-ins. Keep the suggested new database."
+			},
+			"ORIGIN": {
+				"description": "Your app's address, without a trailing slash, e.g. `https://jobhunttrackr.<your-subdomain>.workers.dev`. Your subdomain is shown on the **Workers & Pages** page."
+			},
+			"BETTER_AUTH_SECRET": {
+				"description": "A long random string that signs your sign-ins. Generate one with `openssl rand -base64 32`."
+			},
+			"GITHUB_CLIENT_ID": {
+				"description": "From a [GitHub OAuth app](https://github.com/settings/developers) with the callback URL `<your address>/api/auth/callback/github`."
+			},
+			"GITHUB_CLIENT_SECRET": {
+				"description": "From the same GitHub OAuth app: **Generate a new client secret**."
+			},
+			"ALLOWED_EMAILS": {
+				"description": "Optional. Comma-separated emails allowed to sign in. Leave empty so only you, the first person to sign in, get an account."
+			}
+		}
 	}
 }
