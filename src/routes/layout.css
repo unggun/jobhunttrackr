@@ -1,0 +1,8 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+
+@layer base {
+	body {
+		@apply bg-zinc-50 text-zinc-900 antialiased;
+	}
+}
