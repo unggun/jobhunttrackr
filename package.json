@@ -88,5 +88,8 @@
 				"description": "Optional. Comma-separated emails allowed to sign in. Leave empty so only you, the first person to sign in, get an account."
 			}
 		}
+	},
+	"overrides": {
+		"undici": "^7.30.1"
 	}
 }
