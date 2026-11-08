@@ -24,31 +24,31 @@
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
-		"@sveltejs/adapter-cloudflare": "^8.0.0",
-		"@sveltejs/kit": "^3.0.0",
+		"@sveltejs/adapter-cloudflare": "^8.0.2",
+		"@sveltejs/kit": "^3.1.1",
 		"@sveltejs/vite-plugin-svelte": "^7.2.0",
 		"@tailwindcss/forms": "^0.5.11",
 		"@tailwindcss/vite": "^4.3.0",
 		"@types/node": "^22",
-		"auth": "^1.6.24",
-		"better-auth": "^1.6.24",
+		"auth": "^1.7.14",
+		"better-auth": "^1.7.14",
 		"drizzle-kit": "^0.31.10",
 		"drizzle-orm": "^0.45.2",
-		"eslint": "^10.4.1",
+		"eslint": "^10.14.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.19.0",
 		"globals": "^17.6.0",
 		"prettier": "^3.8.3",
 		"prettier-plugin-svelte": "^4.1.0",
 		"prettier-plugin-tailwindcss": "^0.8.0",
-		"svelte": "^5.57.1",
+		"svelte": "^5.57.3",
 		"svelte-check": "^4.6.0",
 		"tailwindcss": "^4.3.0",
 		"typescript": "^6.0.3",
-		"typescript-eslint": "^8.60.1",
+		"typescript-eslint": "^8.72.1",
 		"vite": "^8.3.0",
 		"vitest": "^4.1.8",
-		"wrangler": "^4.152.0"
+		"wrangler": "^4.156.0"
 	},
 	"imports": {
 		"#lib": "./src/lib/index.js",
@@ -61,10 +61,10 @@
 		"workerd@1.20261019.1": true
 	},
 	"dependencies": {
-		"@better-auth/oauth-provider": "^1.7.12",
-		"@cfworker/json-schema": "^4.1.1",
+		"@better-auth/oauth-provider": "^1.7.14",
+		"@cfworker/json-schema": "^4.1.4",
 		"@modelcontextprotocol/sdk": "^1.32.2",
-		"marked": "^18.1.1",
+		"marked": "^18.1.2",
 		"zod": "^4.6.7"
 	},
 	"cloudflare": {
