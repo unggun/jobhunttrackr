@@ -132,13 +132,15 @@
 							<a
 								href={resolve('/applications/[id]', { id: match.id })}
 								class="font-medium underline"
-								target="_blank">{match.role} at {match.company}</a
+								target="_blank"
 							>
+								{match.role} at {match.company}
+							</a>
 							<StatusBadge status={match.status} />
 							{#if match.appliedAt}
-								<span class="text-zinc-500"
-									>applied {formatDate(new Date(match.appliedAt), timeZone)}</span
-								>
+								<span class="text-zinc-500">
+									applied {formatDate(new Date(match.appliedAt), timeZone)}
+								</span>
 							{/if}
 						</li>
 					{/each}
