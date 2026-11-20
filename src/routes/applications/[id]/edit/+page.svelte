@@ -16,8 +16,9 @@
 	<a
 		href={resolve('/applications/[id]', { id: app.id })}
 		class="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
-		>← {app.role} at {app.company}</a
 	>
+		← {app.role} at {app.company}
+	</a>
 	<h1 class="mt-2 mb-6 text-2xl font-semibold tracking-tight">Edit application</h1>
 	{#key app.id}
 		<ApplicationForm
@@ -40,7 +41,9 @@
 	>
 		<button
 			class="text-sm font-medium text-rose-600 hover:text-rose-800 dark:text-rose-400"
-			type="submit">Delete this application</button
+			type="submit"
 		>
+			Delete this application
+		</button>
 	</form>
 </main>

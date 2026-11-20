@@ -123,8 +123,9 @@
 					class="rounded-md px-3 py-1 capitalize {data.view === view
 						? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
 						: 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'}"
-					>{view}</a
 				>
+					{view}
+				</a>
 			{/each}
 		</div>
 	</div>
@@ -169,8 +170,9 @@
 							<span
 								class="hidden rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800 sm:inline dark:bg-orange-950 dark:text-orange-300"
 								title="No news for over two weeks. Follow up, or mark it as ghosted."
-								>Follow up?</span
 							>
+								Follow up?
+							</span>
 						{/if}
 						<span class="hidden w-24 text-right text-xs text-zinc-500 sm:block">
 							{formatRelativeDay(app.appliedAt ?? app.updatedAt, data.timeZone)}
@@ -235,9 +237,9 @@
 									{#if column === 'closed'}
 										<StatusBadge status={statusOf(app)} />
 									{:else if needsFollowUp(app)}
-										<span class="text-xs font-medium text-orange-700 dark:text-orange-400"
-											>Follow up?</span
-										>
+										<span class="text-xs font-medium text-orange-700 dark:text-orange-400">
+											Follow up?
+										</span>
 									{:else}
 										<span></span>
 									{/if}
