@@ -18,8 +18,9 @@
 		<a
 			href={resolve('/applications/[id]', { id: app.id })}
 			class="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
-			>← Back to application</a
 		>
+			← Back to application
+		</a>
 		<button class="btn-secondary" onclick={() => print()}>Print</button>
 	</div>
 
@@ -100,10 +101,10 @@
 					<li class="text-sm">
 						<p class="font-medium">
 							{round.name}
-							<span class="font-normal text-zinc-500"
-								>{round.scheduledAt ? `· ${formatDate(round.scheduledAt, data.timeZone)}` : ''}
-								{round.interviewers ? `· with ${round.interviewers}` : ''}</span
-							>
+							<span class="font-normal text-zinc-500">
+								{round.scheduledAt ? `· ${formatDate(round.scheduledAt, data.timeZone)}` : ''}
+								{round.interviewers ? `· with ${round.interviewers}` : ''}
+							</span>
 						</p>
 						{#if round.feedback}
 							<p class="mt-0.5 whitespace-pre-wrap text-zinc-700 dark:text-zinc-300">
