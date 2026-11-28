@@ -47,8 +47,10 @@
 <main class="mx-auto max-w-6xl px-4 py-6">
 	<a
 		href={resolve('/applications')}
-		class="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100">← Applications</a
+		class="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
 	>
+		← Applications
+	</a>
 
 	<div class="mt-2 flex flex-wrap items-start justify-between gap-4">
 		<div class="min-w-0">
@@ -75,8 +77,9 @@
 							<ExternalLink
 								href={app.jobUrl}
 								class="rounded-md px-2 py-1 text-xs font-medium text-sky-700 hover:bg-sky-50 dark:text-sky-400 dark:hover:bg-sky-950"
-								>Open original ↗</ExternalLink
 							>
+								Open original ↗
+							</ExternalLink>
 						{/if}
 					</div>
 				</div>
@@ -93,8 +96,10 @@
 					<p class="mt-2 text-sm text-zinc-500">
 						No copy of the posting yet. <a
 							href={resolve('/applications/[id]/edit', { id: app.id })}
-							class="underline">Paste it in</a
-						> so you have it for interviews.
+							class="underline"
+						>
+							Paste it in
+						</a> so you have it for interviews.
 					</p>
 				{/if}
 			</section>
@@ -155,13 +160,15 @@
 											</p>
 										</div>
 										<div class="flex items-center gap-2 text-sm">
-											<span class="font-medium {OUTCOME_STYLES[round.outcome]}"
-												>{OUTCOME_LABELS[round.outcome]}</span
-											>
+											<span class="font-medium {OUTCOME_STYLES[round.outcome]}">
+												{OUTCOME_LABELS[round.outcome]}
+											</span>
 											<button
 												class="rounded-md px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-												onclick={() => (editingRound = round.id)}>Edit</button
+												onclick={() => (editingRound = round.id)}
 											>
+												Edit
+											</button>
 											<form
 												method="post"
 												action="?/deleteRound"
@@ -172,8 +179,9 @@
 												<input type="hidden" name="roundId" value={round.id} />
 												<button
 													class="rounded-md px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-100 hover:text-rose-600 dark:hover:bg-zinc-800"
-													>Delete</button
 												>
+													Delete
+												</button>
 											</form>
 										</div>
 									</div>
@@ -258,8 +266,9 @@
 					<ExternalLink
 						href={app.applicationUrl}
 						class="mt-3 block text-sm text-sky-700 underline dark:text-sky-400"
-						>Application form ↗</ExternalLink
 					>
+						Application form ↗
+					</ExternalLink>
 				{/if}
 			</section>
 		</aside>
